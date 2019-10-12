@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<title></title>
+		<link href="css/mui.min.css" rel="stylesheet" />
+		<style>
+			ul {
+				font-size: 14px;
+				color: #8f8f94;
+			}
+			.mui-btn {
+				padding: 10px;
+			}
+			button{
+				display: block;
+				margin: auto;
+			}
+		</style>
+		<style>
+        .table {
+                border: 1px solid #cad9ea;
+                color: #666;
+            }
+
+            .table th {
+                background-repeat: repeat-x;
+                height: 30px;
+            }
+
+            .table td,
+            .table th {
+                border: 1px solid #cad9ea;
+                padding: 0 1em 0;
+            }
+
+            .table tr.alter {
+                background-color: #f5fafe;
+            }
+		</style>
+		<script src="js/mui.enterfocus.js"></script>
+		<script src="js/mui.min.js"></script>
+		<script src="js/app.js"></script>
+		<script src="js/jquery.min.js"></script>
+	</head>
+	<script>
+		mui.plusReady(function () {
+		    plus.screen.lockOrientation("portrait-primary");
+		})
+	</script>
+	<body>
+		<!-- 主界面菜单同时移动 -->
+			<!-- 侧滑导航根容器 -->
+			<div class="mui-off-canvas-wrap mui-draggable">
+				<!-- 主页面容器 -->
+				<div class="mui-inner-wrap">
+					<!-- 菜单容器 -->
+					<aside class="mui-off-canvas-left" id="offCanvasSide">
+						<div class="mui-scroll-wrapper">
+							<div class="mui-scroll">
+								<!-- 菜单具体展示内容 -->
+								<ul class="mui-table-view">
+										<li class="mui-table-view-cell" id="link">
+											<a class="mui-navigate-right">
+												连接天平
+											</a>
+										</li>
+										<li class="mui-table-view-cell" id="new">
+											<a class="mui-navigate-right">
+												 新建批次
+											</a>
+										</li>
+										<li class="mui-table-view-cell" id="choose">
+											<a class="mui-navigate-right">
+												 选择批次
+											</a>
+										</li>
+										<li class="mui-table-view-cell" id="delPici">
+											<a class="mui-navigate-right">
+												 删除批次
+											</a>
+										</li>
+										<li class="mui-table-view-cell">
+											<a class="mui-navigate-right">
+												 保存数据
+											</a>
+										</li>
+									</ul>
+							</div>
+						</div>
+					</aside>
+					<!-- 主页面标题 -->
+					<header class="mui-bar mui-bar-nav">
+						<a class="mui-icon mui-action-menu mui-icon-bars mui-pull-left" href="#offCanvasSide"></a>
+						<h1 class="mui-title" id="title"></h1>
+					</header>
+
+					
+					<nav class="mui-bar mui-bar-tab">
+						<a class="mui-tab-item" id = "refresh">
+							<span class="mui-tab-label">刷新</span>
+						</a>
+						<a class="mui-tab-item" id="add">
+							<span class="mui-tab-label">追加</span>
+						</a>
+						<a class="mui-tab-item" id="del">
+							<span class="mui-tab-label">删除</span>
+						</a>
+						<a class="mui-tab-item" id="close">
+							<span class="mui-tab-label back">退出</span>
+						</a>
+					</nav>
+					<!-- 主页面内容容器 -->
+					<div class="mui-content mui-scroll-wrapper">
+						<div class="mui-scroll">
+							<!-- 主界面具体展示内容 -->
+							<table class = "table" style="width: 100%;" id="table"> 
+								<tr> 
+									<th>序号</th> 
+									<th>样品名</th> 
+									<th>重量</th> 
+								</tr> 
+							</table>
+						</div>
+					</div>
+			   	 <div class="mui-off-canvas-backdrop"></div>
+				</div>
+			</div>
+		<script>
+			//刷新事件绑定
+			document.getElementById("refresh").addEventListener("tap", function(){
+				location.reload();
+			});
+			//追加事件绑定
+			document.getElementById("add").addEventListener("tap", function(){
+				add();
+			});
+			//删除事件绑定
+			document.getElementById("del").addEventListener("tap",function(){
+				del();
+			})
+			//关闭事件绑定
+			document.getElementById("close").addEventListener("tap",function(){
+				mui.close();
+			})
+			//连接蓝牙事件绑定
+			document.getElementById("link").addEventListener("tap",function(){
+				link();
+			})
+			//新建批次事件绑定
+			document.getElementById("new").addEventListener("tap",function(){
+				newPici();
+			})
+			//选择批次事件绑定
+			document.getElementById("choose").addEventListener("tap",function(){
+				choose();
+			})
+			//删除批次事件绑定
+			document.getElementById("choose").addEventListener("tap",function(){
+				delPici();
+			})
+			//获取重量事件绑定
+			
+			//追加
+			function add(){
+				//修改弹出框默认input类型为password 
+				mui.prompt('','样品名','请输入样品名',['确定','取消'],
+				function(e){
+					var num = getNextXvHao();
+					var value = {
+						"pici": getPiCi(),
+						"xvhao": num,
+						"name": e.value,
+						"weight": "null"
+					}
+					if(e.index == 0){
+						var key = value.pici + " " + value.xvhao;
+						var data = value;
+						localStorage.setItem(key,JSON.stringify(data));
+						//localStorage.clear();
+						localStorage.setItem(value.pici,value.xvhao)
+					}
+					if(e.index == 1){
+						localStorage.clear();
+					}
+					show();
+				}
+				,'div') 
+				document.querySelector('.mui-popup-input input').type='text';
+			}
+			
+			function del(){
+				//修改弹出框默认input类型为password 
+				mui.prompt('','要删除的序号','请输入要删除的序号',['删除','取消'],
+				function(e){
+					if(e.index == 0){
+						var del = getPiCi() + " " + e.value;
+						localStorage.removeItem(del);
+						//localStorage.clear();
+					}
+					if(e.index == 1){
+						localStorage.clear();
+					}
+					location.reload();
+				}
+				,'div') 
+				document.querySelector('.mui-popup-input input').type='text';
+			}
+			//关闭
+			mui.close = function(){
+				var btn = ["确定","取消"];
+				mui.confirm('确认关闭当前窗口？','提示',btn,function(e){
+					if(e.index==0){
+						mui.currentWebview.close();
+					}
+				});
+			}
+			function link(){
+				console.log("=================================================================================================================")
+				mui.plusReady(function () {
+				    plus.bluetooth.getBluetoothDevices({
+						success:function(e){
+							var devices = e.devices;
+							for(var i in devices){
+								console.log(i+': '+JSON.stringify(devices[i]));
+							}
+						},
+						fail:function(e){
+							console.log('get devices failed: '+JSON.stringify(e));
+						}
+					});
+				})
+			}
+			function newPici(){
+				//修改弹出框默认input类型为password 
+				mui.prompt('','新建批次名','批次名',['新建','取消'],
+				function(e){
+					if(e.index == 0){
+						var temp = localStorage.getItem("piciList") + "";
+						var picis = new Array();
+						picis = temp.split(" ");
+						if(picis.indexOf(e.value) != -1){
+							alert("此批次号已被使用");
+						}
+						else{
+							temp = temp + " " + e.value;
+							localStorage.setItem("piciList",temp);
+							localStorage.setItem("pici",e.value);
+							localStorage.removeItem("xvhao");
+						}
+						location.reload();
+						//localStorage.clear();
+					}
+					if(e.index == 1){
+						
+					}
+				}
+				,'div') 
+				document.querySelector('.mui-popup-input input').type='text';
+			}
+			function choose(){
+				//修改弹出框默认input类型为password 
+				mui.prompt('','要切换的批次号','批次名',['确定','取消'],
+				function(e){
+					if(e.index == 0){
+						var temp = localStorage.getItem("piciList") + "";
+						var picis = new Array();
+						picis = temp.split(" ");
+						if(picis.indexOf(e.value) == -1){
+							alert("此批次不存在");
+						}
+						else{
+							localStorage.setItem("pici",e.value);
+							var t = picis[picis.length - 1]
+							var x = localStorage.getItem(getPiCi()) + "";
+							localStorage.setItem("xvhao",x);
+						}
+						location.reload();
+						//localStorage.clear();
+					}
+					if(e.index == 1){
+						
+					}
+				}
+				,'div') 
+				document.querySelector('.mui-popup-input input').type='text';
+			}
+			function delPici(){
+				//修改弹出框默认input类型为password 
+				mui.prompt('','要删除的批次号','批次名',['确定','取消'],
+				function(e){
+					if(e.index == 0){
+						var temp = localStorage.getItem("piciList") + "";
+						var picis = new Array();
+						picis = temp.split(" ");
+						if(picis.indexOf(e.value) == -1){
+							alert("此批次不存在");
+						}
+						else{
+							localStorage.setItem("pici",e.value);
+							var t = picis[picis.length - 1]
+							var x = localStorage.getItem(getPiCi()) + "";
+							localStorage.setItem("xvhao",x);
+						}
+						location.reload();
+						//localStorage.clear();
+					}
+					if(e.index == 1){
+						
+					}
+				}
+				,'div') 
+				document.querySelector('.mui-popup-input input').type='text';
+			}
+		</script>
+		<script>
+			//初始化
+			window.onload=function(){
+				document.getElementById("title").innerHTML="电子天平数据记录系统(批次:" + getPiCi() + ")"
+				show();
+				mui.plusReady(
+					function startBluetoothDiscovery(){
+						plus.bluetooth.openBluetoothAdapter({
+							success:function(e){
+								console.log("-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------");
+								plus.bluetooth.startBluetoothDevicesDiscovery({
+									success:function(e){
+										console.log('start discovery success: '+JSON.stringify(e));
+									},
+									fail:function(e){
+										console.log('start discovery failed: '+JSON.stringify(e));
+									}
+								});
+							},
+							fail:function(e){
+								console.log('open failed: '+JSON.stringify(e));
+							}
+						});
+					}
+				);
+			}
+			
+			function getWeight(e){
+				console.log(e.srcElement.name);
+				alert(e.srcElement.name);
+				console.log(this.name);
+			}
+		</script>
+		
+		<script>
+			var i = 1;
+			function getPiCi(){
+				if(localStorage.getItem("pici") == null){
+					localStorage.setItem("pici",1);
+					localStorage.setItem("piciList","1");
+					return 1;
+				}
+				return localStorage.getItem("pici") + "";
+			}
+			function getXvHao(){
+				if(localStorage.getItem("xvhao") == null){
+					localStorage.setItem("xvhao",0);
+					return 0;
+				}
+				return parseInt(localStorage.getItem("xvhao"))
+			}
+			function getNextXvHao(){
+				if(localStorage.getItem("xvhao") == null){
+					localStorage.setItem("xvhao",1);
+					return 1;
+				}
+				var num = parseInt(localStorage.getItem("xvhao")) + 1;
+				localStorage.setItem("xvhao",num);
+				return num;
+			}
+			function show(){
+				var table=document.getElementById("table");
+				var piCi = getPiCi();
+				var maxXvhao = getXvHao();
+				for(;i <= parseInt(maxXvhao);i++){
+					var k = piCi + " " + i;  
+					var data = localStorage.getItem(k);
+					if(data != null){
+						var obj=eval("("+ data+")");
+						var row=table.insertRow(table.rows.length);
+						row.setAttribute("point",k);
+						var c1=row.insertCell(0);
+						c1.innerHTML=obj.xvhao;
+						var c2=row.insertCell(1);
+						c2.innerHTML=obj.name;
+						var c3=row.insertCell(2);
+						if(obj.weight == "null"){
+							c3.innerHTML="<button class=\"weight\" name=\""+piCi + " " + getXvHao() + "\">获取重量</button>";
+						}
+						else c3.innerHTML=obj.weight;
+					}
+				}
+				var btns = document.getElementsByClassName("weight");
+				for(let btn of btns){
+					btn.addEventListener("tap",function(e){
+						getWeight(e);
+					})
+				}
+			}
+		</script>
+	</body>
+
+</html>
