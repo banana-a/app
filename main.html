@@ -63,10 +63,19 @@
 								<!-- 菜单具体展示内容 -->
 								<ul class="mui-table-view">
 										<li class="mui-table-view-cell" id="link">
-											<a class="mui-navigate-right">
+											<a class="mui-navigate-right" href="#popover">
 												连接天平
 											</a>
 										</li>
+										<div id="popover" class="mui-popover">
+											<ul class="mui-table-view">
+												<li class="mui-table-view-cell"><a href="#">Item1</a></li>
+												<li class="mui-table-view-cell"><a href="#">Item2</a></li>
+												<li class="mui-table-view-cell"><a href="#">Item3</a></li>
+												<li class="mui-table-view-cell"><a href="#">Item4</a></li>
+												<li class="mui-table-view-cell"><a href="#">Item5</a></li>
+											</ul>
+										</div>
 										<li class="mui-table-view-cell" id="new">
 											<a class="mui-navigate-right">
 												 新建批次
@@ -223,6 +232,7 @@
 				    plus.bluetooth.getBluetoothDevices({
 						success:function(e){
 							var devices = e.devices;
+							console.log(devices)
 							for(var i in devices){
 								console.log(i+': '+JSON.stringify(devices[i]));
 							}
